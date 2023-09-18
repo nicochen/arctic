@@ -28,8 +28,8 @@ import com.netease.arctic.table.ArcticTable;
 import com.netease.arctic.table.KeyedTable;
 import com.netease.arctic.table.TableIdentifier;
 import com.netease.arctic.table.TableProperties;
-import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.iceberg.PartitionSpec;
+import org.apache.iceberg.Table;
 import org.apache.thrift.TException;
 import org.junit.Assert;
 import org.junit.ClassRule;
@@ -64,8 +64,8 @@ public class TestMixedHiveCatalog extends TestMixedCatalog {
   private void validateTableArcticProperties(TableIdentifier tableIdentifier) throws TException {
     String dbName = tableIdentifier.getDatabase();
     String tbl = tableIdentifier.getTableName();
-    Map<String,String> tableParameter =  TEST_HMS.getHiveClient()
-            .getTable(dbName, tbl).getParameters();
+    Map<String, String> tableParameter = TEST_HMS.getHiveClient()
+        .getTable(dbName, tbl).getParameters();
 
     Assert.assertTrue(tableParameter.containsKey(ARCTIC_TABLE_ROOT_LOCATION));
     Assert.assertTrue(tableParameter.get(ARCTIC_TABLE_ROOT_LOCATION).endsWith(tbl));
@@ -76,6 +76,11 @@ public class TestMixedHiveCatalog extends TestMixedCatalog {
   protected void validateCreatedTable(ArcticTable table) throws TException {
     super.validateCreatedTable(table);
     validateTableArcticProperties(table.id());
+  }
+
+  @Override
+  protected void assertIcebergTableStore(Table tableStore, boolean isBaseStore, boolean isKeyedTable) {
+    // mixed-hive does not check the table store
   }
 
   @Test
@@ -109,7 +114,7 @@ public class TestMixedHiveCatalog extends TestMixedCatalog {
 
     String dbName = table.id().getDatabase();
     String tbl = table.id().getTableName();
-    Table hiveTable = TEST_HMS.getHiveClient().getTable(dbName, tbl);
+    org.apache.hadoop.hive.metastore.api.Table hiveTable = TEST_HMS.getHiveClient().getTable(dbName, tbl);
     Map<String,String> tableParameter = hiveTable.getParameters();
 
     Assert.assertEquals(1, hiveTable.getPartitionKeys().size());

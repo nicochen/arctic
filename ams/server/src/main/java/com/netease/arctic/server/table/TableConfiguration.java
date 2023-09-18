@@ -16,6 +16,7 @@ public class TableConfiguration {
   private boolean cleanOrphanEnabled;
   private long orphanExistingMinutes;
   private boolean autoCreateTagEnabled;
+  private boolean deleteDanglingDeleteFilesEnabled;
   private OptimizingConfig optimizingConfig;
 
   public TableConfiguration() {
@@ -84,6 +85,15 @@ public class TableConfiguration {
     return this;
   }
 
+  public boolean isDeleteDanglingDeleteFilesEnabled() {
+    return deleteDanglingDeleteFilesEnabled;
+  }
+
+  public TableConfiguration setDeleteDanglingDeleteFilesEnabled(boolean deleteDanglingDeleteFilesEnabled) {
+    this.deleteDanglingDeleteFilesEnabled = deleteDanglingDeleteFilesEnabled;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -92,13 +102,14 @@ public class TableConfiguration {
     return expireSnapshotEnabled == that.expireSnapshotEnabled && snapshotTTLMinutes == that.snapshotTTLMinutes &&
         changeDataTTLMinutes == that.changeDataTTLMinutes && cleanOrphanEnabled == that.cleanOrphanEnabled &&
         orphanExistingMinutes == that.orphanExistingMinutes && autoCreateTagEnabled == that.autoCreateTagEnabled &&
+        deleteDanglingDeleteFilesEnabled == that.deleteDanglingDeleteFilesEnabled &&
         Objects.equal(optimizingConfig, that.optimizingConfig);
   }
 
   @Override
   public int hashCode() {
     return Objects.hashCode(expireSnapshotEnabled, snapshotTTLMinutes, changeDataTTLMinutes, cleanOrphanEnabled,
-        orphanExistingMinutes, autoCreateTagEnabled, optimizingConfig);
+        orphanExistingMinutes, autoCreateTagEnabled, deleteDanglingDeleteFilesEnabled, optimizingConfig);
   }
 
   public static TableConfiguration parseConfig(Map<String, String> properties) {
@@ -126,6 +137,10 @@ public class TableConfiguration {
             properties,
             TableProperties.ENABLE_AUTO_CREATE_TAG,
             TableProperties.ENABLE_AUTO_CREATE_TAG_DEFAULT))
+        .setDeleteDanglingDeleteFilesEnabled(CompatiblePropertyUtil.propertyAsBoolean(
+            properties,
+            TableProperties.ENABLE_DANGLING_DELETE_FILES_CLEAN,
+            TableProperties.ENABLE_DANGLING_DELETE_FILES_CLEAN_DEFAULT))
         .setOptimizingConfig(OptimizingConfig.parseOptimizingConfig(properties));
   }
 }

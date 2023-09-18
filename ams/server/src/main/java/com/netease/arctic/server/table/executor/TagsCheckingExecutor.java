@@ -18,6 +18,7 @@
 
 package com.netease.arctic.server.table.executor;
 
+import com.netease.arctic.op.SnapshotSummary;
 import com.netease.arctic.server.table.TableManager;
 import com.netease.arctic.server.table.TableRuntime;
 import com.netease.arctic.table.ArcticTable;
@@ -26,7 +27,6 @@ import com.netease.arctic.table.ChangeTable;
 import com.netease.arctic.table.KeyedTable;
 import com.netease.arctic.table.TableProperties;
 import com.netease.arctic.table.UnkeyedTable;
-import com.netease.arctic.trace.SnapshotSummary;
 import com.netease.arctic.utils.CompatiblePropertyUtil;
 import com.netease.arctic.utils.RefUtil;
 import org.apache.iceberg.Snapshot;

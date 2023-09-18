@@ -24,10 +24,14 @@ import com.netease.arctic.server.table.TableRuntime;
 import com.netease.arctic.table.ArcticTable;
 import com.netease.arctic.table.TableProperties;
 import com.netease.arctic.utils.RefUtil;
+import org.apache.iceberg.ContentFile;
+import org.apache.iceberg.DataFile;
 import org.apache.iceberg.util.PropertyUtil;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
 
 public class FullSnapshotMixedHivePartitionPlan extends MixedIcebergPartitionPlan {
 
@@ -45,15 +49,6 @@ public class FullSnapshotMixedHivePartitionPlan extends MixedIcebergPartitionPla
   }
 
   @Override
-  protected boolean taskNeedExecute(SplitTask task) {
-    if (isOptimizingTag()) {
-      return true;
-    } else {
-      return super.taskNeedExecute(task);
-    }
-  }
-
-  @Override
   protected OptimizingInputProperties buildTaskProperties() {
     OptimizingInputProperties properties = super.buildTaskProperties();
     if (isOptimizingTag()) {
@@ -64,15 +59,17 @@ public class FullSnapshotMixedHivePartitionPlan extends MixedIcebergPartitionPla
 
   @Override
   protected CommonPartitionEvaluator buildEvaluator() {
-    return new FullSnapshotMixedHivePartitionEvaluator(tableRuntime, partition, planTime, isKeyedTable(), branch);
+    return new FullSnapshotMixedHivePartitionEvaluator(tableRuntime, partition, partitionProperties, planTime,
+        isKeyedTable(), branch);
   }
 
   protected static class FullSnapshotMixedHivePartitionEvaluator extends MixedIcebergPartitionEvaluator {
     private final String branch;
 
-    public FullSnapshotMixedHivePartitionEvaluator(TableRuntime tableRuntime, String partition, long planTime,
+    public FullSnapshotMixedHivePartitionEvaluator(TableRuntime tableRuntime, String partition,
+                                                   Map<String, String> partitionProperties, long planTime,
                                                    boolean keyedTable, String branch) {
-      super(tableRuntime, partition, planTime, keyedTable);
+      super(tableRuntime, partition, partitionProperties, planTime, keyedTable);
       this.branch = branch;
     }
 
@@ -84,8 +81,16 @@ public class FullSnapshotMixedHivePartitionPlan extends MixedIcebergPartitionPla
         return super.isFullNecessary();
       }
     }
-  }
 
+    @Override
+    protected boolean fileShouldFullOptimizing(DataFile dataFile, List<ContentFile<?>> deleteFiles) {
+      if (branch != null) {
+        return true;
+      } else {
+        return super.fileShouldFullOptimizing(dataFile, deleteFiles);
+      }
+    }
+  }
 
   private String constructCustomHiveSubdirectory() {
     if (customHiveSubdirectory == null) {

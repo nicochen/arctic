@@ -16,6 +16,7 @@ You can choose to download the stable release package from [download page](../..
 
 - Java 8 is required. Java 17 is required for Trino.
 - Optional: MySQL 5.5 or higher, or MySQL 8
+- Optional: PostgreSQL 14.x or higher
 - Optional: ZooKeeper 3.4.x or higher
 - Optional: Hive (2.x or 3.x)
 - Optional: Hadoop (2.9.x or 3.x)
@@ -110,35 +111,14 @@ make sure the port is not used before configuring it
 
 ### Configure system database
 
-Users can use MySQL as the system database instead of Derby. To do so, the system database must first be initialized in MySQL：
+Users can use MySQL/PostgreSQL as the system database instead of Derby. 
 
-```shell
-$ mysql -h{mysql-host-IP} -P{mysql-port} -u{username} -p
-Enter password: 
-'Welcome to the MySQL monitor.  Commands end with ; or \g.
-Your MySQL connection id is 41592724
-Server version: 5.7.20-v3-log Source distribution
+Create an empty database in MySQL/PostgreSQL, then AMS will automatically create table structures in this MySQL/PostgreSQL database when it first started.
 
-Copyright (c) 2000, 2020, Oracle and/or its affiliates. All rights reserved.
-
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-
-mysql>
-mysql> create database amoro;
-Query OK, 1 row affected (0.01 sec)
-
-mysql> use amoro;
-Database changed
-mysql> source {ARCTIC_HOME}/conf/mysql/ams-mysql-init.sql
-```
-
-Add MySQL configuration under `ams`:
+One thing you need to do is Adding MySQL/PostgreSQL configuration under `config.yaml` of Ams:
 
 ```yaml
+# MySQL
 ams:
   database:
     type: mysql
@@ -146,6 +126,14 @@ ams:
     url: jdbc:mysql://127.0.0.1:3306/amoro?useUnicode=true&characterEncoding=UTF8&autoReconnect=true&useAffectedRows=true&useSSL=false
     username: root
     password: root
+# PostgreSQL
+#ams:
+#  database:
+#    type: postgres
+#    jdbc-driver-class: org.postgresql.Driver
+#    url: jdbc:postgresql://127.0.0.1:5432/amoro
+#    username: user
+#    password: passwd
 ```
 
 ### Configure high availability
